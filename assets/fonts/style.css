@@ -1,0 +1,15 @@
+@font-face {
+   font-family: 'Vazir-Bold-FD';
+   font-display: swap;
+   src: url('Vazir-Bold-FD/font.ttf');
+}
+@font-face {
+   font-family: 'Parastoo-Print-FD';
+   font-display: swap;
+   src: url('Parastoo-Print-FD/font.ttf');
+}
+@font-face {
+   font-family: 'Vazir-Medium-FD';
+   font-display: swap;
+   src: url('Vazir-Medium-FD/font.ttf');
+}

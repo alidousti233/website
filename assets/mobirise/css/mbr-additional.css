@@ -10182,8 +10182,8 @@ a {
   text-align: center;
 }
 .cid-u3uI7i6rv8 {
-  padding-top: 1rem;
-  padding-bottom: 0rem;
+  padding-top: 0rem;
+  padding-bottom: 1rem;
   background-color: #ffffff;
 }
 .cid-u3uI7i6rv8 .mbr-section-subtitle {
@@ -10216,7 +10216,7 @@ a {
   font-weight: 400;
   font-style: normal;
   text-decoration: none;
-  font-family: Parastoo-Print-FD;
+  font-family: "Parastoo-Print-FD";
   mso-font-charset: 178;
   border: none;
   mso-protection: locked visible;
@@ -10234,7 +10234,7 @@ a {
   font-weight: 400;
   font-style: normal;
   text-decoration: none;
-  font-family: Parastoo-Print-FD;
+  font-family: "Parastoo-Print-FD";
   mso-font-charset: 178;
   mso-number-format: General;
   text-align: general;
@@ -10248,22 +10248,20 @@ a {
 }
 .cid-u3uI7i6rv8 .xl65 {
   mso-style-parent: style0;
-  color: black;
   font-size: 14.0pt;
-  font-family: Parastoo-Print-FD;
-  mso-font-charset: 0;
+  font-family: "Parastoo-Print-FD";
+  mso-generic-font-family: auto;
+  mso-font-charset: 178;
   text-align: center;
-  vertical-align: middle;
   border: .5pt solid windowtext;
-  white-space: normal;
 }
 .cid-u3uI7i6rv8 .xl66 {
   mso-style-parent: style0;
   color: black;
   font-size: 14.0pt;
-  font-family: Parastoo-Print-FD;
-  mso-font-charset: 0;
-  mso-number-format: "\[$-2000401\]0";
+  font-family: "Parastoo-Print-FD";
+  mso-generic-font-family: auto;
+  mso-font-charset: 178;
   text-align: center;
   vertical-align: middle;
   border: .5pt solid windowtext;
@@ -10271,11 +10269,16 @@ a {
 }
 .cid-u3uI7i6rv8 .xl67 {
   mso-style-parent: style0;
+  color: black;
   font-size: 14.0pt;
-  font-family: Parastoo-Print-FD;
-  mso-font-charset: 0;
+  font-family: "Parastoo-Print-FD";
+  mso-generic-font-family: auto;
+  mso-font-charset: 178;
+  mso-number-format: "\[$-2000401\]0";
   text-align: center;
+  vertical-align: middle;
   border: .5pt solid windowtext;
+  white-space: normal;
 }
 .cid-u3GvDDmPI1 {
   padding-top: 1rem;

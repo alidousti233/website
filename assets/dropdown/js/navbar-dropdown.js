@@ -1,4 +1,4 @@
-(function () {
+(function(){
 
     function _dataApiHandler(event) {
 
@@ -46,30 +46,29 @@
     windowEvents.forEach(eventName => {
         document.addEventListener(eventName, event => {
             clearTimeout(_timeout);
-            _timeout = setTimeout(function () {
-                _dataApiHandler(event);
-            }, 10);
+                _timeout = setTimeout(function(){
+                    _dataApiHandler(event);
+                }, 10);
         });
     });
 
 
-    const dropdownEvents = ['show.bs.collapse', 'hide.bs.collapse'];
+    let dropdownEvents = ['show.bs.collapse', 'hide.bs.collapse'];
     dropdownEvents.forEach(eventName => {
-        document.addEventListener(eventName, ({ target }) => {
-            const dropDown = target.closest('.navbar-dropdown');
-
-            if (!dropDown) return;
-
-            if (eventName === 'show.bs.collapse') {
-                document.body.classList.add('navbar-dropdown-open')
-                dropDown.classList.add('opened')
-            } else {
-                document.body.classList.remove('navbar-dropdown-open');
-                dropDown.classList.remove('opened');
-                window.dispatchEvent(new Event('scroll.bs.navbar-dropdown.data-api'));
-                dropDown.dispatchEvent(new Event('collapse.bs.navbar-dropdown'));
+        document.addEventListener(eventName, () => {
+            let dropDown = document.querySelector('.navbar-dropdown');
+            if (dropDown) {
+                if (eventName == 'show.bs.collapse') {
+                    document.body.classList.add('navbar-dropdown-open');
+                    dropDown.classList.add('opened');
+                } else {
+                    document.body.classList.remove('navbar-dropdown-open');
+                    dropDown.classList.remove('opened');
+                    window.dispatchEvent(new CustomEvent('scroll.bs.navbar-dropdown.data-api'));
+                    dropDown.dispatchEvent(new CustomEvent('collapse.bs.navbar-dropdown'));
+                }
             }
-        })
+        });
     });
 
     document.addEventListener('collapse.bs.nav-dropdown', event => {
@@ -77,16 +76,8 @@
         if (dropDown) {
             let toggler = dropDown.querySelector('.navbar-toggler[aria-expanded="true"]');
             if (toggler) {
-                toggler.dispatchEvent(new Event('click'));
+                toggler.dispatchEvent(new CustomEvent('click'));
             }
         }
     });
-
-    const dropdowns = document.querySelectorAll('.nav-link.dropdown-toggle')
-    dropdowns.forEach(item => {
-        item.addEventListener('click', e => {
-            e.preventDefault();
-            e.target.parentNode.classList.toggle('open');
-        })
-    })
 })();

@@ -19,11 +19,11 @@ body {
 }
 .display-4 {
   font-family: 'Vazir-Medium-FD';
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.5;
 }
 .display-4 > .mbr-iconfont {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
 }
 .display-5 {
   font-family: 'Vazir-Bold-FD';
@@ -34,7 +34,7 @@ body {
   font-size: 1.875rem;
 }
 .display-7 {
-  font-family: 'IRANSansXFaNum-Regular';
+  font-family: 'Parastoo-FD';
   font-size: 1.1rem;
   line-height: 1.5;
 }
@@ -63,9 +63,9 @@ body {
     line-height: calc( 1.3 * (1.245rem + (1.7 - 1.245) * ((100vw - 20rem) / (48 - 20))));
   }
   .display-4 {
-    font-size: 0.8rem;
-    font-size: calc( 1rem + (1 - 1) * ((100vw - 20rem) / (48 - 20)));
-    line-height: calc( 1.4 * (1rem + (1 - 1) * ((100vw - 20rem) / (48 - 20))));
+    font-size: 0.88rem;
+    font-size: calc( 1.0350000000000001rem + (1.1 - 1.0350000000000001) * ((100vw - 20rem) / (48 - 20)));
+    line-height: calc( 1.4 * (1.0350000000000001rem + (1.1 - 1.0350000000000001) * ((100vw - 20rem) / (48 - 20))));
   }
   .display-5 {
     font-size: 1.2rem;
@@ -596,12 +596,12 @@ a:hover {
 }
 .form-control {
   font-family: 'Vazir-Medium-FD';
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.5;
   font-weight: 400;
 }
 .form-control > .mbr-iconfont {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
 }
 .form-control:hover,
 .form-control:focus {
@@ -610,12 +610,12 @@ a:hover {
 }
 .form-control:-webkit-input-placeholder {
   font-family: 'Vazir-Medium-FD';
-  font-size: 1rem;
+  font-size: 1.1rem;
   line-height: 1.5;
   font-weight: 400;
 }
 .form-control:-webkit-input-placeholder > .mbr-iconfont {
-  font-size: 1.25rem;
+  font-size: 1.375rem;
 }
 blockquote {
   border-color: #0e6260;
@@ -1112,6 +1112,7 @@ a {
 .cid-u451p1z56W .mbr-text,
 .cid-u451p1z56W .cost,
 .cid-u451p1z56W .mbr-section-btn {
+  line-height: 1.6;
   direction: rtl;
   text-align: right;
 }
@@ -11943,6 +11944,10 @@ a {
 }
 .cid-u50kOaCJYn .mbr-section-title {
   text-align: right;
+}
+.cid-u50kOaCJYn .mbr-text {
+  text-align: right;
+  line-height: 1.6;
 }
 .cid-u4rl1Rgi5y {
   padding-top: 2rem;

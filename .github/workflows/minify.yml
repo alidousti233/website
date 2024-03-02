@@ -15,7 +15,6 @@ jobs:
     runs-on: ubuntu-latest
 
   steps:
-    - name: 8527826
       uses: actions/checkout@v3
 
     - name: Minify Action

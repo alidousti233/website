@@ -1,43 +1,32 @@
-# Simple workflow for deploying static content to GitHub Pages
-name: Deploy static content to Pages
+name: Auto Minifier CSS
 
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch 
 on:
-  # Runs on pushes targeting the default branch
   push:
-    branches: ["master"]
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
-
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
-concurrency:
-  group: "pages"
-  cancel-in-progress: false
-
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  # Single deploy job since we're just deploying
-  deploy:
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
     runs-on: ubuntu-latest
+
+    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Pages
-        uses: actions/configure-pages@v4
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          # Upload entire repository
-          path: '.'
-      - name: Deploy to GitHub Pages
-        id: deployment
-        uses: actions/deploy-pages@v4
+      # Checks-out your repository under $GITHUB_WORKSPACE, so auto-minify job can access it
+       - uses: actions/checkout@v2
+
+       - name: Auto Minify
+         uses: nizarmah/auto-minify@v1.6
+
+       # Auto commits minified files to the repository
+       # Ignore it if you don't want to commit the files to the repository 
+       - name: Auto committing minified files
+         uses: stefanzweifel/git-auto-commit-action@v3.0.0
+         with:
+           commit_message: "Automated: Minified CSS files"
+           branch: ${{ github.ref }}

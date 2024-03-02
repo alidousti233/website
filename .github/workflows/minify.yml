@@ -1,22 +1,29 @@
-name: Minify Workflow
+---
+name: CI
+
 on:
-  push:
-    branches: [ foo ]
+push:
+  branches:
+    - master
+pull_request:
+  branches:
+    - master
 
 jobs:
   build:
+    name: Building Artifacts
     runs-on: ubuntu-latest
-    steps:
-      # Checks-out your repository
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.ref }}
 
-      - name: Minify Action
-        uses: anthonyftwang/minify-action@v1.0.1
+  steps:
+    - name: Checkout Code
+      uses: actions/checkout@v3
 
-      # Auto-commit to repository
-      - uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: Minify source code
-          branch: ${{ github.ref }}
+    - name: Minify Action
+      uses: anthonyftwang/minify-action@v1.0.1
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: html-site
+        path: public
+        retention-days: 1

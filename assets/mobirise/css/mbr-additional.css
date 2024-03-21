@@ -1116,6 +1116,50 @@ a {
   direction: rtl;
   text-align: right;
 }
+.cid-u7EZCf2wt2 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #ffffff;
+  direction: rtl;
+}
+.cid-u7EZCf2wt2 .mbr-section-title {
+  direction: rtl;
+  text-align: center;
+}
+.cid-u7EZCf2wt2 .mbr-section-text {
+  direction: rtl;
+  text-align: center;
+}
+.cid-u7EZCf2wt2 button[type="submit"] {
+  border-radius: 100px;
+  direction: rtl;
+}
+.cid-u7EZCf2wt2 a[type="submit"],
+.cid-u7EZCf2wt2 button[type="submit"] {
+  margin-top: 0;
+  direction: rtl;
+}
+.cid-u7EZCf2wt2 .wsSearchError {
+  direction: rtl;
+  text-align: center;
+  background-color: #ff4a52;
+}
+.cid-u7EZCf2wt2 mark {
+  padding: 0;
+  color: inherit;
+  direction: rtl;
+  background-color: #ffe161;
+}
+.cid-u7EZCf2wt2 .row .spinner-border,
+.cid-u7EZCf2wt2 .row .spinner-grow {
+  width: 32px;
+  color: #4479d9;
+  direction: rtl;
+}
+.cid-u7EZCf2wt2 .gdpr-block {
+  direction: rtl;
+  display: none;
+}
 .cid-u4554EaNBX {
   padding-top: 1rem;
   padding-bottom: 1rem;

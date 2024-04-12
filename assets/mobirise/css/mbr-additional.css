@@ -1136,9 +1136,6 @@ a {
 .cid-u4554EaNBX span:focus {
   outline: none;
 }
-.cid-u4554EaNBX .item {
-  cursor: pointer;
-}
 .cid-u4554EaNBX .item-wrapper {
   position: relative;
   border-radius: 4px;
@@ -1334,7 +1331,7 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 .cid-u458ui2V5p {
-  padding-top: 3rem;
+  padding-top: 2rem;
   padding-bottom: 1rem;
   background-color: #fafafa;
 }

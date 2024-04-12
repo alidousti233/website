@@ -1334,7 +1334,7 @@ a {
   -webkit-tap-highlight-color: transparent;
 }
 .cid-u458ui2V5p {
-  padding-top: 2rem;
+  padding-top: 3rem;
   padding-bottom: 1rem;
   background-color: #fafafa;
 }
@@ -1384,6 +1384,9 @@ a {
 .cid-u458ui2V5p .mbr-section-title {
   text-align: right;
   color: #000000;
+}
+.cid-u458ui2V5p .image-border {
+  border-radius: 14px;
 }
 .cid-u458wfZwEg {
   padding-top: 1rem;

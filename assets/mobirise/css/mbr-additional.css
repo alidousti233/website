@@ -2155,8 +2155,6 @@ a {
   font-weight: 400;
   font-style: normal;
   text-decoration: none;
-  font-family: "Parastoo-FD";
-  mso-font-charset: 178;
   border: none;
   mso-protection: locked visible;
   mso-style-name: Normal;
@@ -2169,12 +2167,8 @@ a {
   padding-left: 1px;
   mso-ignore: padding;
   color: black;
-  font-size: 11.0pt;
-  font-weight: 400;
   font-style: normal;
   text-decoration: none;
-  font-family: "Parastoo-FD";
-  mso-font-charset: 178;
   mso-number-format: General;
   text-align: general;
   vertical-align: bottom;
@@ -2187,20 +2181,12 @@ a {
 }
 .cid-u4btn6mvcA .xl65 {
   mso-style-parent: style0;
-  font-size: 12.0pt;
-  font-family: "Parastoo-FD";
-  mso-generic-font-family: auto;
-  mso-font-charset: 178;
   text-align: center;
   border: .5pt solid windowtext;
 }
 .cid-u4btn6mvcA .xl66 {
   mso-style-parent: style0;
   color: black;
-  font-size: 12.0pt;
-  font-family: "Parastoo-FD";
-  mso-generic-font-family: auto;
-  mso-font-charset: 178;
   text-align: center;
   vertical-align: middle;
   border: .5pt solid windowtext;
@@ -2209,10 +2195,6 @@ a {
 .cid-u4btn6mvcA .xl67 {
   mso-style-parent: style0;
   color: black;
-  font-size: 12.0pt;
-  font-family: "Parastoo-FD";
-  mso-generic-font-family: auto;
-  mso-font-charset: 178;
   mso-number-format: "\[$-2000401\]0";
   text-align: center;
   vertical-align: middle;

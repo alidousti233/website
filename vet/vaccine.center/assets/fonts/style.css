@@ -1,0 +1,10 @@
+@font-face {
+   font-family: 'Vazir-Light-FD-WOL';
+   font-display: swap;
+   src: url('Vazir-Light-FD-WOL/font.woff');
+}
+@font-face {
+   font-family: 'Vazir-Medium-FD-WOL';
+   font-display: swap;
+   src: url('Vazir-Medium-FD-WOL/font.woff');
+}

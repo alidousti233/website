@@ -760,10 +760,11 @@ a {
   margin: 0.667em 1em !important;
 }
 .cid-globalmenu .nav-dropdown .link.dropdown-toggle::after {
-  margin-left: 0.5rem;
+  margin-right: 0.5rem;
   margin-top: 0.2rem;
 }
 .cid-globalmenu .nav-link {
+  direction: rtl;
   position: relative;
 }
 .cid-globalmenu .container {
@@ -1368,21 +1369,17 @@ a {
 .cid-u458ui2V5p .justify-content-center {
   align-items: center;
 }
-.cid-u458ui2V5p H1 {
-  color: #40b0bf;
-  direction: rtl;
-  text-align: right;
-}
-.cid-u458ui2V5p P {
-  direction: rtl;
-  text-align: right;
-}
 .cid-u458ui2V5p .mbr-section-title {
   text-align: right;
+  direction: rtl;
   color: #000000;
 }
 .cid-u458ui2V5p .image-border {
   border-radius: 14px;
+}
+.cid-u458ui2V5p P {
+  direction: rtl;
+  text-align: right;
 }
 .cid-u458wfZwEg {
   padding-top: 1rem;

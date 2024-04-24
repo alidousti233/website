@@ -2352,32 +2352,6 @@ a {
   direction: ltr;
   text-align: left;
 }
-.cid-u3OxPe9qJm {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3OxPe9qJm .mbr-section-subtitle {
-  direction: rtl;
-  text-align: right;
-}
-.cid-u3OxPe9qJm .mbr-text {
-  direction: rtl;
-  text-align: right;
-}
-.cid-u3OyiID2ga {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3OyiID2ga .mbr-section-subtitle {
-  direction: ltr;
-  text-align: right;
-}
-.cid-u3OyiID2ga .mbr-text {
-  direction: ltr;
-  text-align: left;
-}
 .cid-u3RkIwqSJo {
   padding-top: 0rem;
   padding-bottom: 0rem;
@@ -2390,71 +2364,6 @@ a {
 .cid-u3RkIwqSJo .mbr-text {
   direction: rtl;
   text-align: right;
-}
-.cid-u3Rl7kynWE {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3Rl7kynWE .mbr-section-subtitle {
-  direction: ltr;
-  text-align: right;
-}
-.cid-u3Rl7kynWE .mbr-text {
-  direction: ltr;
-  text-align: left;
-}
-.cid-u3RlnlzUcC {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3RlnlzUcC .mbr-section-subtitle {
-  direction: rtl;
-  text-align: right;
-}
-.cid-u3RlnlzUcC .mbr-text {
-  direction: rtl;
-  text-align: right;
-}
-.cid-u3Rl7Nv8DR {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3Rl7Nv8DR .mbr-section-subtitle {
-  direction: ltr;
-  text-align: right;
-}
-.cid-u3Rl7Nv8DR .mbr-text {
-  direction: ltr;
-  text-align: left;
-}
-.cid-u3RlFw3N3Q {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3RlFw3N3Q .mbr-section-subtitle {
-  direction: rtl;
-  text-align: right;
-}
-.cid-u3RlFw3N3Q .mbr-text {
-  direction: rtl;
-  text-align: right;
-}
-.cid-u3RlMVrucN {
-  padding-top: 0rem;
-  padding-bottom: 0rem;
-  background-color: #ffffff;
-}
-.cid-u3RlMVrucN .mbr-section-subtitle {
-  direction: ltr;
-  text-align: right;
-}
-.cid-u3RlMVrucN .mbr-text {
-  direction: ltr;
-  text-align: left;
 }
 .cid-vaccineglobal {
   padding-top: 2rem;
@@ -2832,4 +2741,21 @@ a {
 .cid-u9W20QALzo .mbr-text {
   text-align: justify;
   line-height: 1.6;
+}
+.cid-uaT9yPa6C5 {
+  padding-top: 2rem;
+  padding-bottom: 0rem;
+  background-color: #ffffff;
+}
+.cid-uaT9yPa6C5 .mbr-section-subtitle {
+  direction: rtl;
+  text-align: right;
+}
+.cid-uaT9yPa6C5 .mbr-text {
+  direction: rtl;
+  text-align: justify;
+  line-height: 1.6;
+}
+.cid-uaT9yPa6C5 .mbr-section-title {
+  text-align: right;
 }

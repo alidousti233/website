@@ -2680,3 +2680,25 @@ a {
 .cid-uaT9yPa6C5 .mbr-section-title {
   text-align: right;
 }
+.cid-ubuYqm3CuD html,
+.cid-ubuYqm3CuD body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fff;
+}
+.cid-ubuYqmUuKy {
+  padding-top: 1rem;
+  padding-bottom: 0rem;
+  background-color: #ffffff;
+}
+.cid-ubuYqmUuKy .line {
+  background-color: #6592e6;
+  align: center;
+  height: 2px;
+  margin: 0 auto;
+}
+.cid-ubuYqmUuKy .mbr-text {
+  direction: rtl;
+  text-align: right;
+}

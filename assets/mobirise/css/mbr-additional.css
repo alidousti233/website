@@ -2716,3 +2716,109 @@ a {
   direction: rtl;
   text-align: right;
 }
+.cid-ud83L8ShYy {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #ffffff;
+}
+.cid-ud83L8ShYy .mbr-fallback-image.disabled {
+  display: none;
+}
+.cid-ud83L8ShYy .mbr-fallback-image {
+  display: block;
+  background-size: cover;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+.cid-ud83L8ShYy .top-line {
+  display: flex;
+  justify-content: space-between;
+}
+.cid-ud83L8ShYy .mbr-section-title,
+.cid-ud83L8ShYy .mbr-section-subtitle {
+  direction: rtl;
+  text-align: center;
+}
+.cid-ud83L8ShYy .item:not(:nth-last-child(1)) {
+  margin-bottom: 2rem;
+}
+.cid-ud83L8ShYy .item-wrapper {
+  direction: rtl;
+  text-align: right;
+  border-radius: 4px;
+  background-color: #fafafa;
+}
+.cid-ud83L8ShYy .image-wrapper img {
+  width: 100%;
+  object-fit: cover;
+}
+@media (max-width: 767px) {
+  .cid-ud83L8ShYy .card-box {
+    padding: 1rem;
+  }
+}
+@media (min-width: 768px) {
+  .cid-ud83L8ShYy .card-box {
+    padding-left: 2rem;
+  }
+}
+@media (min-width: 992px) {
+  .cid-ud83L8ShYy .card-box {
+    padding-right: 2rem;
+    padding-left: 4rem;
+  }
+}
+.cid-ud83L8ShYy .mbr-section-title {
+  text-align: right;
+}
+.cid-ud83L8ShYy .mbr-text {
+  text-align: justify;
+  line-height: 1.6;
+}
+.cid-ud84OnyJvi html,
+.cid-ud84OnyJvi body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fff;
+}
+.cid-ud84OoiNlT {
+  padding-top: 1rem;
+  padding-bottom: 0rem;
+  background-color: #ffffff;
+}
+.cid-ud84OoiNlT .line {
+  background-color: #6592e6;
+  align: center;
+  height: 2px;
+  margin: 0 auto;
+}
+.cid-ud84OoiNlT .mbr-text {
+  direction: rtl;
+  text-align: right;
+}
+.cid-ud87i37ixN html,
+.cid-ud87i37ixN body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fff;
+}
+.cid-ud87i3Rx3X {
+  padding-top: 1rem;
+  padding-bottom: 0rem;
+  background-color: #ffffff;
+}
+.cid-ud87i3Rx3X .line {
+  background-color: #6592e6;
+  align: center;
+  height: 2px;
+  margin: 0 auto;
+}
+.cid-ud87i3Rx3X .mbr-text {
+  direction: rtl;
+  text-align: right;
+}

@@ -2683,6 +2683,34 @@ a {
 .cid-uaT9yPa6C5 .mbr-section-title {
   text-align: right;
 }
+.cid-urmSy6VBX3 {
+  padding-top: 2rem;
+  padding-bottom: 2rem;
+  background-color: #ffffff;
+}
+.cid-urmSy6VBX3 .mbr-fallback-image.disabled {
+  display: none;
+}
+.cid-urmSy6VBX3 .mbr-fallback-image {
+  display: block;
+  background-size: cover;
+  background-position: center center;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+@media (max-width: 991px) {
+  .cid-urmSy6VBX3 .image-wrapper {
+    margin-bottom: 1rem;
+  }
+}
+.cid-urmSy6VBX3 .row {
+  flex-direction: row-reverse;
+}
+.cid-urmSy6VBX3 img {
+  width: 100%;
+}
 .cid-ubuYqm3CuD html,
 .cid-ubuYqm3CuD body {
   margin: 0;

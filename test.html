@@ -228,13 +228,13 @@
             <div class="search-group" style="flex: 2;">
                 <label><i class="fas fa-search"></i> جستجوی متن آزاد</label>
                 <div class="search-input-wrapper">
-                    <input type="text" id="liveSearch" placeholder="نام واکسن، نماینده، کشور، حیوان هدف...">
+                    <input type="text" id="liveSearch" placeholder="نام واکسن، نماینده، کشور، شاخه...">
                     <button id="searchButton"><i class="fas fa-search"></i> جستجو</button>
                 </div>
             </div>
             <div class="search-group">
-                <label><i class="fas fa-paw"></i> فیلتر حیوان هدف</label>
-                <select id="animalFilter">
+                <label><i class="fas fa-chart-pie"></i> فیلتر شاخه واکسن</label>
+                <select id="branchFilter">
                     <option value="">🐾 همه حیوانات</option>
                 </select>
             </div>
@@ -304,28 +304,27 @@
     }
 
     function populateFilters() {
-        const animalsSet = new Set();
+        const branchesSet = new Set();
         const countriesSet = new Set();
 
         for (const v of allVaccines) {
-            // فقط با جداکننده | (خط عمودی)
-            const targetRaw = v["هدف"] || "";
-            const parts = targetRaw.split('|').filter(p => p.trim().length > 0);
-            parts.forEach(p => animalsSet.add(p.trim()));
-
+            const branch = v["شاخه"] || "";
+            if (branch) branchesSet.add(branch);
             if (v["کشور"]) countriesSet.add(v["کشور"]);
         }
 
-        const animalSelect = document.getElementById('animalFilter');
-        while (animalSelect.options.length > 1) animalSelect.remove(1);
-        const sortedAnimals = [...animalsSet].sort();
-        for (const a of sortedAnimals) {
+        // پر کردن فیلتر شاخه
+        const branchSelect = document.getElementById('branchFilter');
+        while (branchSelect.options.length > 1) branchSelect.remove(1);
+        const sortedBranches = [...branchesSet].sort();
+        for (const b of sortedBranches) {
             const option = document.createElement('option');
-            option.value = a;
-            option.textContent = a;
-            animalSelect.appendChild(option);
+            option.value = b;
+            option.textContent = b;
+            branchSelect.appendChild(option);
         }
 
+        // پر کردن فیلتر کشور
         const countrySelect = document.getElementById('countryFilter');
         while (countrySelect.options.length > 1) countrySelect.remove(1);
         const sortedCountries = [...countriesSet].sort();
@@ -335,13 +334,6 @@
             option.textContent = c;
             countrySelect.appendChild(option);
         }
-    }
-
-    // تطابق حیوان: فقط بر اساس جداکننده |
-    function matchesAnimal(target, selectedAnimal) {
-        if (!selectedAnimal) return true;
-        const targetParts = target.split('|').filter(p => p.trim().length > 0);
-        return targetParts.some(part => part.trim() === selectedAnimal);
     }
 
     function escapeHtml(str) {
@@ -363,7 +355,7 @@
         const pageData = filteredData.slice(start, start + rowsPerPage);
         
         if (!pageData.length) {
-            tbody.innerHTML = '</table><td colspan="9" class="no-data"><i class="fas fa-search fa-2x"></i><br><br>❌ هیچ واکسنی یافت نشد<br><small>عبارت دیگری جستجو کنید</small><\/td><\/tr>';
+            tbody.innerHTML = '<tr><td colspan="9" class="no-data"><i class="fas fa-search fa-2x"></i><br><br>❌ هیچ واکسنی یافت نشد<br><small>عبارت دیگری جستجو کنید</small><\/td><\/tr>';
             return;
         }
         
@@ -418,11 +410,11 @@
 
     function filterVaccines() {
         const searchText = document.getElementById('liveSearch').value.trim().toLowerCase();
-        const animalVal = document.getElementById('animalFilter').value;
+        const branchVal = document.getElementById('branchFilter').value;
         const countryVal = document.getElementById('countryFilter').value;
         
         filteredData = allVaccines.filter(v => {
-            if (animalVal && !matchesAnimal(v["هدف"] || '', animalVal)) return false;
+            if (branchVal && v["شاخه"] !== branchVal) return false;
             if (countryVal && v["کشور"] !== countryVal) return false;
             if (searchText) {
                 const combined = (
@@ -445,7 +437,7 @@
 
     document.getElementById('liveSearch').addEventListener('input', filterVaccines);
     document.getElementById('searchButton').addEventListener('click', filterVaccines);
-    document.getElementById('animalFilter').addEventListener('change', filterVaccines);
+    document.getElementById('branchFilter').addEventListener('change', filterVaccines);
     document.getElementById('countryFilter').addEventListener('change', filterVaccines);
     
     loadData();

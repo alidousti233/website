@@ -281,7 +281,6 @@
     let rowsPerPage = 20;
     let filteredData = [];
 
-    // بارگذاری فایل JSON
     async function loadData() {
         try {
             const response = await fetch('vaccine.data.json');
@@ -289,7 +288,6 @@
             const data = await response.json();
             if (Array.isArray(data) && data.length) {
                 allVaccines = data;
-                // پر کردن منوی حیوانات و کشورها
                 populateFilters();
                 filteredData = [...allVaccines];
                 renderTable();
@@ -300,28 +298,27 @@
             }
         } catch (err) {
             console.error(err);
-            document.getElementById('tableBody').innerHTML = '<td><td colspan="9" class="no-data"><i class="fas fa-exclamation-triangle fa-2x"></i><br><br>❌ خطا در بارگذاری داده<br><small>فایل vaccine.data.json یافت نشد یا مشکل دارد</small><\/td><\/tr>';
+            document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" class="no-data"><i class="fas fa-exclamation-triangle fa-2x"></i><br><br>❌ خطا در بارگذاری داده<br><small>فایل vaccine.data.json یافت نشد یا مشکل دارد</small><\/td><\/tr>';
             document.getElementById('resultCount').innerHTML = 'خطا در بارگذاری';
         }
     }
 
-    // استخراج گزینه‌های منحصر‌به‌فرد برای فیلترها
     function populateFilters() {
-        const animals = new Set();
-        const countries = new Set();
+        const animalsSet = new Set();
+        const countriesSet = new Set();
 
         for (const v of allVaccines) {
-            const target = v["هدف"] || "";
-            // حیوان ممکن است شامل چند مقدار با جداکننده | ، یا فاصله باشد
-            const parts = target.split(/[\|\،\،\s]+/).filter(p => p.trim().length > 0);
-            parts.forEach(p => animals.add(p.trim()));
+            // فقط با جداکننده | (خط عمودی)
+            const targetRaw = v["هدف"] || "";
+            const parts = targetRaw.split('|').filter(p => p.trim().length > 0);
+            parts.forEach(p => animalsSet.add(p.trim()));
 
-            if (v["کشور"]) countries.add(v["کشور"]);
+            if (v["کشور"]) countriesSet.add(v["کشور"]);
         }
 
-        // مرتب‌سازی و اضافه به سلکت حیوان
         const animalSelect = document.getElementById('animalFilter');
-        const sortedAnimals = [...animals].sort();
+        while (animalSelect.options.length > 1) animalSelect.remove(1);
+        const sortedAnimals = [...animalsSet].sort();
         for (const a of sortedAnimals) {
             const option = document.createElement('option');
             option.value = a;
@@ -329,15 +326,22 @@
             animalSelect.appendChild(option);
         }
 
-        // مرتب‌سازی و اضافه به سلکت کشور
         const countrySelect = document.getElementById('countryFilter');
-        const sortedCountries = [...countries].sort();
+        while (countrySelect.options.length > 1) countrySelect.remove(1);
+        const sortedCountries = [...countriesSet].sort();
         for (const c of sortedCountries) {
             const option = document.createElement('option');
             option.value = c;
             option.textContent = c;
             countrySelect.appendChild(option);
         }
+    }
+
+    // تطابق حیوان: فقط بر اساس جداکننده |
+    function matchesAnimal(target, selectedAnimal) {
+        if (!selectedAnimal) return true;
+        const targetParts = target.split('|').filter(p => p.trim().length > 0);
+        return targetParts.some(part => part.trim() === selectedAnimal);
     }
 
     function escapeHtml(str) {
@@ -359,7 +363,7 @@
         const pageData = filteredData.slice(start, start + rowsPerPage);
         
         if (!pageData.length) {
-            tbody.innerHTML = '<tr><td colspan="9" class="no-data"><i class="fas fa-search fa-2x"></i><br><br>❌ هیچ واکسنی یافت نشد<br><small>عبارت دیگری جستجو کنید</small><\/td><\/tr>';
+            tbody.innerHTML = '</table><td colspan="9" class="no-data"><i class="fas fa-search fa-2x"></i><br><br>❌ هیچ واکسنی یافت نشد<br><small>عبارت دیگری جستجو کنید</small><\/td><\/tr>';
             return;
         }
         
@@ -418,7 +422,7 @@
         const countryVal = document.getElementById('countryFilter').value;
         
         filteredData = allVaccines.filter(v => {
-            if (animalVal && !(v["هدف"] || '').includes(animalVal)) return false;
+            if (animalVal && !matchesAnimal(v["هدف"] || '', animalVal)) return false;
             if (countryVal && v["کشور"] !== countryVal) return false;
             if (searchText) {
                 const combined = (

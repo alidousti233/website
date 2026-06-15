@@ -7,7 +7,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
   <link rel="shortcut icon" href="assets/images/veticon-128x128-1.png" type="image/x-icon">
-  <meta name="description" content="">
+  <meta name="description" content="مشاهده جدول واکسن های مصرفی طیور در ایران به تفکیک نام واکسن(لاتین)، نام واکسن(فارسی)، شرکت وارد کننده، کشورهای سازنده، کارخانه تولید کننده، نام(لاتین)، نام(فارسی)، شرایط نگهداری، ژنریک قدیم، شکل دارویی، گروه دارویی و حیوان هدف">
   
   
   <title>بانک واکسنهای دامپزشکی</title>
@@ -16,11 +16,191 @@
   <link rel="stylesheet" href="assets/socicon/css/styles.css">
   <link rel="stylesheet" href="assets/theme/css/style.css">
   <link href="assets/fonts/style.css" rel="stylesheet">
-  <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css?v=KICp2e"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css?v=KICp2e" type="text/css">
+  <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css?v=LTn1Md"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css?v=LTn1Md" type="text/css">
 
   
   
-  
+  <script>
+    let allVaccines = [];
+    let currentPage = 1;
+    let rowsPerPage = 20;
+    let filteredData = [];
+
+    async function loadData() {
+        try {
+            // ⚠️ مسیر فایل JSON رو اینجا تنظیم کنید
+            const response = await fetch('assets/data/vaccine.data.json');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const data = await response.json();
+            
+            if (Array.isArray(data) && data.length) {
+                allVaccines = data;
+                populateFilters();
+                filteredData = [...allVaccines];
+                renderTable();
+                renderPagination();
+                updateStats();
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            document.getElementById('tableBody').innerHTML = 
+                '<tr><td colspan="9" class="text-center py-5">' +
+                '<p class="text-danger">❌ خطا در بارگذاری اطلاعات</p>' +
+                '<small>لطفاً فایل JSON را در مسیر assets/data/ قرار دهید</small>' +
+                '</td></tr>';
+        }
+    }
+
+    function populateFilters() {
+        const branches = new Set();
+        const countries = new Set();
+        
+        allVaccines.forEach(v => {
+            if (v["شاخه"]) branches.add(v["شاخه"]);
+            if (v["کشور"]) countries.add(v["کشور"]);
+        });
+
+        const branchSelect = document.getElementById('branchFilter');
+        [...branches].sort().forEach(b => {
+            branchSelect.innerHTML += `<option value="${b}">${b}</option>`;
+        });
+
+        const countrySelect = document.getElementById('countryFilter');
+        [...countries].sort().forEach(c => {
+            countrySelect.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function renderTable() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const pageData = filteredData.slice(start, start + rowsPerPage);
+        const tbody = document.getElementById('tableBody');
+        
+        if (!pageData.length) {
+            tbody.innerHTML = 
+                '<tr><td colspan="9" class="text-center py-5">' +
+                '<p>😕 هیچ نتیجه‌ای یافت نشد</p>' +
+                '<small>جستجوی دیگری امتحان کنید</small>' +
+                '</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = pageData.map(v => `
+            <tr>
+                <td><strong>${escapeHtml(v["نام"])}</strong></td>
+                <td>${escapeHtml(v["کشور"])}</td>
+                <td>${escapeHtml(v["نماینده"])}</td>
+                <td>${escapeHtml(v["کارخانه"])}</td>
+                <td>${escapeHtml(v["دما"] || '2-8°C')}</td>
+                <td>${escapeHtml(v["شاخه"])}</td>
+                <td>${escapeHtml(v["شکل"])}</td>
+                <td>${escapeHtml(v["گروه"])}</td>
+                <td>${escapeHtml(v["هدف"])}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        const paginationDiv = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="d-flex align-items-center gap-2 flex-wrap">';
+        
+        // First & Previous
+        html += `<button class="pagination-btn" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>⏮</button>`;
+        html += `<button class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        // Next & Last
+        html += `<button class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`;
+        html += `<button class="pagination-btn" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>⏭</button>`;
+
+        // Rows per page
+        html += `<select onchange="changeRowsPerPage(this.value)" style="margin-right: 15px; padding: 8px; border-radius: 10px; border: 1px solid #ddd;">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>۱۰ ردیف</option>
+            <option value="20" ${rowsPerPage === 20 ? 'selected' : ''}>۲۰ ردیف</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>۵۰ ردیف</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>۱۰۰ ردیف</option>
+        </select>`;
+        
+        html += '</div>';
+        paginationDiv.innerHTML = html;
+    }
+
+    function goToPage(page) {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    function changeRowsPerPage(value) {
+        rowsPerPage = parseInt(value);
+        currentPage = 1;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    function updateStats() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        document.getElementById('resultCount').innerHTML = 
+            `📊 ${filteredData.length} از ${allVaccines.length} واکسن | صفحه ${currentPage} از ${totalPages || 1}`;
+    }
+
+    function filterVaccines() {
+        const searchText = document.getElementById('liveSearch').value.trim().toLowerCase();
+        const branchVal = document.getElementById('branchFilter').value;
+        const countryVal = document.getElementById('countryFilter').value;
+        
+        filteredData = allVaccines.filter(v => {
+            if (branchVal && v["شاخه"] !== branchVal) return false;
+            if (countryVal && v["کشور"] !== countryVal) return false;
+            if (searchText) {
+                const searchIn = [v["نام"], v["نماینده"], v["کشور"], v["شاخه"], v["هدف"]]
+                    .filter(Boolean).join(' ').toLowerCase();
+                return searchIn.includes(searchText);
+            }
+            return true;
+        });
+        
+        currentPage = 1;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    // Event Listeners
+    document.getElementById('liveSearch')?.addEventListener('input', filterVaccines);
+    document.getElementById('searchButton')?.addEventListener('click', filterVaccines);
+    document.getElementById('branchFilter')?.addEventListener('change', filterVaccines);
+    document.getElementById('countryFilter')?.addEventListener('change', filterVaccines);
+    
+    // Auto-load
+    loadData();
+</script>
+body {
+    direction: rtl;
+    text-align: right;
+}
 </head>
 <body>
 
@@ -46,7 +226,7 @@ referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 
 
   
-  <section data-bs-version="5.1" class="menu menu1 cid-globalmenu cid-vmkFR2lGir" once="menu" id="menu1-h3">
+  <section data-bs-version="5.1" class="menu menu1 cid-globalmenu cid-vmlyJLGblk" once="menu" id="menu1-h3">
     
 
     <nav class="navbar navbar-dropdown navbar-fixed-top navbar-expand-lg">
@@ -79,382 +259,606 @@ referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
     </nav>
 </section>
 
-<section class="mbr-section article content1 cid-vmkH9DoeSs" id="custom-html-h7">
+<section class="mbr-section mbr-section--no-padding cid-vmCUxQkrrx" id="witsec-html-block-hf">
 
-     
 
+
+
+
+<!-- Place your own code below -->
+<style>
+    /* ====== استایل آیکون‌های اینلاین ====== */
+    .icon {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        vertical-align: -0.125em;
+        margin-left: 5px;
+        background-size: contain;
+        background-repeat: no-repeat;
+        background-position: center;
+    }
+    
+    /* آیکون‌های SVG به صورت data-uri */
+    .icon-syringe { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Cpath fill='white' d='M441 7l32 32-32 32-32-32 32-32zM73 199l241 241-58 58L15 257l58-58zm185 15l64-64-32-32-64 64 32 32zm96 96l64-64-32-32-64 64 32 32z'/%3E%3C/svg%3E"); }
+    .icon-cow { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 640 512'%3E%3Cpath fill='white' d='M512 192c0-53-43-96-96-96c-35 0-66 19-83 47c-17-28-48-47-83-47c-53 0-96 43-96 96c0 38 21 70 52 87l-20 105h48l14-80h84l14 80h48l-20-105c31-17 52-49 52-87zM256 256c-35 0-64-29-64-64s29-64 64-64s64 29 64 64s-29 64-64 64zm128 0c-35 0-64-29-64-64s29-64 64-64s64 29 64 64s-29 64-64 64z'/%3E%3C/svg%3E"); }
+    
+    /* بقیه استایل‌ها */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    
+    body {
+        font-family: 'Tahoma', 'Vazir', sans-serif;
+        direction: rtl;
+        text-align: right;
+    }
+    
+    .vaccine-dashboard {
+        background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+        padding: 60px 0;
+        min-height: 100vh;
+    }
+    
+    .main-header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+    }
+    
+    .main-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+    
+    .main-header p {
+        font-size: 0.9rem;
+        opacity: 0.85;
+        background: rgba(0,0,0,0.3);
+        display: inline-block;
+        padding: 5px 15px;
+        border-radius: 30px;
+        margin-top: 5px;
+    }
+    
+    .search-card {
+        background: rgba(255,255,255,0.95);
+        border-radius: 24px;
+        padding: 20px;
+        margin-bottom: 25px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+    }
+    
+    .search-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .search-group {
+        flex: 1;
+        min-width: 180px;
+    }
+    
+    .search-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #1e3c72;
+        font-size: 0.85rem;
+    }
+    
+    .search-input-wrapper {
+        position: relative;
+        width: 100%;
+    }
+    
+    .search-input-wrapper input,
+    .search-group select,
+    #liveSearch,
+    #branchFilter,
+    #countryFilter {
+        width: 100%;
+        padding: 12px 14px;
+        border: 2px solid #e2e8f0 !important;
+        border-radius: 16px !important;
+        font-size: 0.9rem !important;
+        font-family: inherit !important;
+        background: white !important;
+        text-align: right !important;
+        outline: none !important;
+        box-shadow: none !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    .search-input-wrapper input {
+        padding: 12px 45px 12px 14px;
+    }
+    
+    .search-input-wrapper input:focus,
+    .search-group select:focus,
+    #liveSearch:focus,
+    #branchFilter:focus,
+    #countryFilter:focus {
+        border-color: #2a5298 !important;
+        box-shadow: 0 0 0 3px rgba(42,82,152,0.15) !important;
+        outline: none !important;
+    }
+    
+    input:invalid,
+    select:invalid {
+        border-color: #e2e8f0 !important;
+        box-shadow: none !important;
+    }
+    
+    .search-btn {
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        border: none;
+        color: white;
+        padding: 6px 12px;
+        border-radius: 12px;
+        cursor: pointer;
+        font-size: 0.8rem;
+        z-index: 2;
+        font-family: inherit;
+    }
+    
+    .search-btn:hover {
+        transform: translateY(-50%) translateY(-1px);
+        box-shadow: 0 5px 15px rgba(42,82,152,0.3);
+    }
+    
+    .search-group select {
+        cursor: pointer;
+        appearance: auto;
+    }
+    
+    .stats-card {
+        background: white;
+        border-radius: 20px;
+        padding: 14px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 12px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+    }
+    
+    .stats-info {
+        font-weight: 600;
+        color: #2d3748;
+        font-size: 0.85rem;
+    }
+    
+    .table-wrapper {
+        background: white;
+        border-radius: 24px 24px 0 0;
+        overflow: hidden;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+    }
+    
+    .table-scroll {
+        overflow-x: auto;
+    }
+    
+    .vaccine-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.8rem;
+        min-width: 900px;
+    }
+    
+    .vaccine-table thead {
+        background: linear-gradient(135deg, #1e3c72, #2a5298);
+        color: white;
+    }
+    
+    .vaccine-table th {
+        padding: 14px 10px;
+        text-align: right;
+        font-weight: 600;
+        font-size: 0.85rem;
+        white-space: nowrap;
+    }
+    
+    .vaccine-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: top;
+        line-height: 1.4;
+        text-align: right;
+    }
+    
+    .vaccine-table tbody tr:hover {
+        background-color: #f7fafc;
+    }
+    
+    .vaccine-table tbody tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .pagination-wrapper {
+        background: white;
+        padding: 20px;
+        border-radius: 0 0 24px 24px;
+        border-top: 1px solid #edf2f7;
+    }
+    
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        flex-wrap: wrap;
+    }
+    
+    .pagination button {
+        background: #e2e8f0;
+        border: none;
+        padding: 8px 14px;
+        border-radius: 10px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+        font-family: inherit;
+    }
+    
+    .pagination button:hover:not(:disabled) {
+        background: #2a5298;
+        color: white;
+    }
+    
+    .pagination button:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+    
+    .pagination select {
+        padding: 8px 12px;
+        border-radius: 10px;
+        border: 1px solid #e2e8f0 !important;
+        background: white;
+        font-family: inherit;
+        outline: none !important;
+        box-shadow: none !important;
+    }
+    
+    .pagination select:focus {
+        border-color: #2a5298 !important;
+        box-shadow: 0 0 0 3px rgba(42,82,152,0.15) !important;
+    }
+    
+    .no-data {
+        text-align: center;
+        padding: 50px 20px;
+        color: #a0aec0;
+    }
+    
+    .loading {
+        text-align: center;
+        padding: 50px;
+        color: #667eea;
+    }
+    
+    .mbr-section-container input,
+    .mbr-section-container select {
+        border-color: #e2e8f0 !important;
+    }
+    
+    /* Spinner ساده با CSS */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .spinner {
+        display: inline-block;
+        width: 30px;
+        height: 30px;
+        border: 3px solid #e2e8f0;
+        border-top: 3px solid #2a5298;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-bottom: 15px;
+    }
+    
+    @media (max-width: 768px) {
+        .vaccine-dashboard {
+            padding: 30px 0;
+        }
+        .main-header h1 {
+            font-size: 1.3rem;
+        }
+        .vaccine-table th, 
+        .vaccine-table td {
+            padding: 8px 6px;
+            font-size: 0.7rem;
+        }
+        .pagination button {
+            padding: 5px 10px;
+            font-size: 0.7rem;
+        }
+    }
+</style>
+
+<div class="vaccine-dashboard">
     <div class="container">
-        <div class="media-container-row">
-            <div class="mbr-text col-12 col-md-12">
-                <style>
-                    /* vaccine table styles – scoped to avoid conflicts */
-                    .vaccine-wrapper {
-                        font-family: 'Segoe UI', Tahoma, 'Vazir', system-ui, sans-serif;
-                        direction: rtl;
-                        max-width: 1400px;
-                        margin: 0 auto;
-                        padding: 15px;
-                        background: #f0f2f5;
-                        border-radius: 24px;
-                    }
-                    .vaccine-header {
-                        text-align: center;
-                        margin-bottom: 25px;
-                    }
-                    .vaccine-header h2 {
-                        font-size: 1.8rem;
-                        margin-bottom: 8px;
-                        color: #1e3c72;
-                    }
-                    .vaccine-header p {
-                        font-size: 0.9rem;
-                        color: #2c3e50;
-                        background: rgba(0,0,0,0.05);
-                        display: inline-block;
-                        padding: 5px 15px;
-                        border-radius: 30px;
-                    }
-                    .search-card {
-                        background: white;
-                        border-radius: 24px;
-                        padding: 20px;
-                        margin-bottom: 25px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                    }
-                    .search-row {
-                        display: flex;
-                        flex-wrap: wrap;
-                        gap: 15px;
-                    }
-                    .search-group {
-                        flex: 1;
-                        min-width: 180px;
-                    }
-                    .search-group label {
-                        display: block;
-                        margin-bottom: 8px;
-                        font-weight: 600;
-                        font-size: 0.85rem;
-                        color: #1e3c72;
-                    }
-                    .search-input-wrapper {
-                        position: relative;
-                    }
-                    .search-input-wrapper input {
-                        width: 100%;
-                        padding: 10px 40px 10px 12px;
-                        border: 1px solid #ccc;
-                        border-radius: 20px;
-                        font-size: 0.9rem;
-                        background: #fff;
-                    }
-                    .search-input-wrapper button {
-                        position: absolute;
-                        left: 8px;
-                        top: 50%;
-                        transform: translateY(-50%);
-                        background: #1e3c72;
-                        border: none;
-                        color: white;
-                        padding: 4px 12px;
-                        border-radius: 20px;
-                        cursor: pointer;
-                        font-size: 0.75rem;
-                    }
-                    select {
-                        width: 100%;
-                        padding: 10px 12px;
-                        border-radius: 20px;
-                        border: 1px solid #ccc;
-                        background: white;
-                        cursor: pointer;
-                        font-size: 0.9rem;
-                    }
-                    .stats-card {
-                        background: white;
-                        border-radius: 20px;
-                        padding: 10px 20px;
-                        margin-bottom: 20px;
-                        display: flex;
-                        justify-content: space-between;
-                        align-items: center;
-                        flex-wrap: wrap;
-                        font-size: 0.85rem;
-                        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-                    }
-                    .table-wrapper {
-                        background: white;
-                        border-radius: 24px;
-                        overflow-x: auto;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-                    }
-                    .vaccine-table {
-                        width: 100%;
-                        border-collapse: collapse;
-                        font-size: 0.8rem;
-                        min-width: 900px;
-                    }
-                    .vaccine-table th {
-                        background: #1e3c72;
-                        color: white;
-                        padding: 12px 8px;
-                        text-align: right;
-                        font-weight: 600;
-                    }
-                    .vaccine-table td {
-                        padding: 10px 8px;
-                        border-bottom: 1px solid #eee;
-                        text-align: right;
-                    }
-                    .vaccine-table tr:hover {
-                        background: #f9f9ff;
-                    }
-                    .pagination {
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        gap: 8px;
-                        padding: 20px;
-                        flex-wrap: wrap;
-                        background: white;
-                        border-radius: 0 0 24px 24px;
-                    }
-                    .pagination button, .pagination select {
-                        padding: 6px 12px;
-                        border-radius: 20px;
-                        border: 1px solid #ddd;
-                        background: #f8f9fa;
-                        cursor: pointer;
-                    }
-                    .pagination button:disabled {
-                        opacity: 0.5;
-                    }
-                    .no-data {
-                        text-align: center;
-                        padding: 40px;
-                        color: #777;
-                    }
-                    .loading {
-                        text-align: center;
-                        padding: 40px;
-                        color: #1e3c72;
-                    }
-                    @media (max-width: 768px) {
-                        .search-row { flex-direction: column; }
-                        .vaccine-table th, .vaccine-table td { font-size: 0.7rem; padding: 6px 4px; }
-                    }
-                </style>
+        <!-- Header -->
+        <div class="main-header">
+            <h1>
+                💉 بانک جامع واکسن‌های دامپزشکی 🐄
+            </h1>
+            <p>📋 جستجوی زنده | صفحه‌بندی خودکار | بدون آیکون تکراری در جدول</p>
+        </div>
 
-                <div class="vaccine-wrapper">
-                    <div class="vaccine-header">
-                        <h2><i class="fas fa-syringe"></i> بانک جامع واکسن‌های دامپزشکی <i class="fas fa-cow"></i></h2>
-                        <p>📋 جستجوی زنده | صفحه‌بندی خودکار | بدون آیکون تکراری</p>
+        <!-- Search Box -->
+        <div class="search-card">
+            <div class="search-row">
+                <div class="search-group" style="flex: 2;">
+                    <label>🔍 جستجوی متن آزاد</label>
+                    <div class="search-input-wrapper">
+                        <input type="text" id="liveSearch" placeholder="نام واکسن، نماینده، کشور، شاخه..." autocomplete="off">
+                        <button class="search-btn" id="searchButton">🔍 جستجو</button>
                     </div>
-
-                    <div class="search-card">
-                        <div class="search-row">
-                            <div class="search-group" style="flex: 2;">
-                                <label><i class="fas fa-search"></i> جستجوی متن آزاد</label>
-                                <div class="search-input-wrapper">
-                                    <input type="text" id="liveSearch" placeholder="نام واکسن، نماینده، کشور، شاخه...">
-                                    <button id="searchButton">جستجو</button>
-                                </div>
-                            </div>
-                            <div class="search-group">
-                                <label><i class="fas fa-chart-pie"></i> فیلتر شاخه واکسن</label>
-                                <select id="branchFilter">
-                                    <option value="">🌿 همه شاخه‌ها</option>
-                                </select>
-                            </div>
-                            <div class="search-group">
-                                <label><i class="fas fa-globe"></i> فیلتر کشور سازنده</label>
-                                <select id="countryFilter">
-                                    <option value="">🌍 همه کشورها</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="stats-card">
-                        <div><i class="fas fa-database"></i> <span id="resultCount">در حال بارگذاری...</span></div>
-                        <div><i class="fas fa-calendar-alt"></i> بروزرسانی خرداد ۱۴۰۵</div>
-                    </div>
-
-                    <div class="table-wrapper">
-                        <table class="vaccine-table">
-                            <thead>
-                                <tr>
-                                    <th>نام واکسن</th>
-                                    <th>کشور</th>
-                                    <th>نماینده</th>
-                                    <th>کارخانه</th>
-                                    <th>دما</th>
-                                    <th>شاخه</th>
-                                    <th>شکل</th>
-                                    <th>گروه</th>
-                                    <th>هدف</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tableBody">
-                                <tr><td colspan="9" class="loading"><i class="fas fa-spinner fa-pulse"></i> در حال بارگذاری...<br><small>لطفاً چند لحظه صبر کنید</small></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="pagination" id="pagination"></div>
                 </div>
+                <div class="search-group">
+                    <label>📊 فیلتر شاخه واکسن</label>
+                    <select id="branchFilter">
+                        <option value="">🐾 همه شاخه‌ها</option>
+                    </select>
+                </div>
+                <div class="search-group">
+                    <label>🌍 فیلتر کشور سازنده</label>
+                    <select id="countryFilter">
+                        <option value="">🌍 همه کشورها</option>
+                    </select>
+                </div>
+            </div>
+        </div>
 
-                <script>
-                    (function() {
-                        let allVaccines = [];
-                        let currentPage = 1;
-                        let rowsPerPage = 20;
-                        let filteredData = [];
+        <!-- Stats -->
+        <div class="stats-card">
+            <div class="stats-info">📊 <span id="resultCount">در حال بارگذاری...</span></div>
+            <div class="stats-info">📅 <span>بروزرسانی اطلاعات خرداد ۱۴۰۵</span></div>
+        </div>
 
-                        async function loadData() {
-                            try {
-                                const response = await fetch('vaccine.data.json');
-                                if (!response.ok) throw new Error('HTTP ' + response.status);
-                                const data = await response.json();
-                                if (Array.isArray(data) && data.length) {
-                                    allVaccines = data;
-                                    populateFilters();
-                                    filteredData = [...allVaccines];
-                                    renderTable();
-                                    renderPagination();
-                                    updateStats();
-                                } else {
-                                    throw new Error('فرمت داده صحیح نیست');
-                                }
-                            } catch (err) {
-                                console.error(err);
-                                document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" class="no-data"><i class="fas fa-exclamation-triangle"></i> خطا در بارگذاری داده<br><small>فایل vaccine.data.json یافت نشد یا مشکل دارد</small><\/td><\/tr>';
-                                document.getElementById('resultCount').innerHTML = 'خطا در بارگذاری';
-                            }
-                        }
-
-                        function populateFilters() {
-                            const branchesSet = new Set();
-                            const countriesSet = new Set();
-                            for (const v of allVaccines) {
-                                if (v["شاخه"]) branchesSet.add(v["شاخه"]);
-                                if (v["کشور"]) countriesSet.add(v["کشور"]);
-                            }
-                            const branchSelect = document.getElementById('branchFilter');
-                            while (branchSelect.options.length > 1) branchSelect.remove(1);
-                            [...branchesSet].sort().forEach(b => {
-                                const opt = document.createElement('option');
-                                opt.value = b;
-                                opt.textContent = b;
-                                branchSelect.appendChild(opt);
-                            });
-                            const countrySelect = document.getElementById('countryFilter');
-                            while (countrySelect.options.length > 1) countrySelect.remove(1);
-                            [...countriesSet].sort().forEach(c => {
-                                const opt = document.createElement('option');
-                                opt.value = c;
-                                opt.textContent = c;
-                                countrySelect.appendChild(opt);
-                            });
-                        }
-
-                        function escapeHtml(str) { return str ? str.replace(/[&<>]/g, m => m === '&' ? '&amp;' : m === '<' ? '&lt;' : '&gt;') : ''; }
-
-                        function getStorageIcon(storage) {
-                            if (!storage) return '';
-                            if (storage.includes('-196')) return '<i class="fas fa-snowflake" style="color:#3182ce;"></i> ';
-                            if (storage.includes('15-25')) return '<i class="fas fa-sun" style="color:#ed8936;"></i> ';
-                            if (storage.includes('70')) return '<i class="fas fa-temperature-low" style="color:#00b894;"></i> ';
-                            return '<i class="fas fa-thermometer-half" style="color:#38a169;"></i> ';
-                        }
-
-                        function renderTable() {
-                            const start = (currentPage-1)*rowsPerPage;
-                            const pageData = filteredData.slice(start, start+rowsPerPage);
-                            const tbody = document.getElementById('tableBody');
-                            if(!pageData.length){
-                                tbody.innerHTML = '<tr><td colspan="9" class="no-data">❌ هیچ واکسنی یافت نشد<\/td><\/tr>';
-                                return;
-                            }
-                            let html = '';
-                            for(const v of pageData){
-                                html += `<tr>
-                                    <td style="min-width:250px;">${escapeHtml(v["نام"])}<\/td>
-                                    <td>${escapeHtml(v["کشور"])}<\/td>
-                                    <td>${escapeHtml(v["نماینده"])}<\/td>
-                                    <td>${escapeHtml(v["کارخانه"])}<\/td>
-                                    <td>${getStorageIcon(v["دما"])} ${escapeHtml(v["دما"]||'2-8°C')}<\/td>
-                                    <td>${escapeHtml(v["شاخه"])}<\/td>
-                                    <td>${escapeHtml(v["شکل"])}<\/td>
-                                    <td>${escapeHtml(v["گروه"])}<\/td>
-                                    <td>${escapeHtml(v["هدف"])}<\/td>
-                                <\/tr>`;
-                            }
-                            tbody.innerHTML = html;
-                        }
-
-                        function renderPagination() {
-                            const totalPages = Math.ceil(filteredData.length/rowsPerPage);
-                            const div = document.getElementById('pagination');
-                            if(totalPages<=1){ div.innerHTML = ''; return; }
-                            div.innerHTML = `
-                                <button id="firstPage" ${currentPage===1?'disabled':''}><i class="fas fa-angle-double-right"></i></button>
-                                <button id="prevPage" ${currentPage===1?'disabled':''}><i class="fas fa-angle-right"></i></button>
-                                <span>صفحه ${currentPage} از ${totalPages}</span>
-                                <button id="nextPage" ${currentPage===totalPages?'disabled':''}><i class="fas fa-angle-left"></i></button>
-                                <button id="lastPage" ${currentPage===totalPages?'disabled':''}><i class="fas fa-angle-double-left"></i></button>
-                                <select id="rowsPerPageSelect">
-                                    <option value="10" ${rowsPerPage===10?'selected':''}>۱۰ ردیف</option>
-                                    <option value="20" ${rowsPerPage===20?'selected':''}>۲۰ ردیف</option>
-                                    <option value="50" ${rowsPerPage===50?'selected':''}>۵۰ ردیف</option>
-                                    <option value="100" ${rowsPerPage===100?'selected':''}>۱۰۰ ردیف</option>
-                                </select>
-                            `;
-                            document.getElementById('firstPage')?.addEventListener('click',()=>{currentPage=1; renderTable(); renderPagination(); updateStats();});
-                            document.getElementById('prevPage')?.addEventListener('click',()=>{if(currentPage>1){currentPage--; renderTable(); renderPagination(); updateStats();}});
-                            document.getElementById('nextPage')?.addEventListener('click',()=>{if(currentPage<totalPages){currentPage++; renderTable(); renderPagination(); updateStats();}});
-                            document.getElementById('lastPage')?.addEventListener('click',()=>{currentPage=totalPages; renderTable(); renderPagination(); updateStats();});
-                            document.getElementById('rowsPerPageSelect')?.addEventListener('change',(e)=>{rowsPerPage=+e.target.value; currentPage=1; renderTable(); renderPagination(); updateStats();});
-                        }
-
-                        function updateStats() {
-                            document.getElementById('resultCount').innerHTML = `${filteredData.length} مورد از ${allVaccines.length} واکسن | صفحه ${currentPage}`;
-                        }
-
-                        function filterVaccines() {
-                            const searchText = document.getElementById('liveSearch').value.trim().toLowerCase();
-                            const branchVal = document.getElementById('branchFilter').value;
-                            const countryVal = document.getElementById('countryFilter').value;
-                            filteredData = allVaccines.filter(v => {
-                                if(branchVal && v["شاخه"] !== branchVal) return false;
-                                if(countryVal && v["کشور"] !== countryVal) return false;
-                                if(searchText){
-                                    const text = (v["نام"]+' '+v["نماینده"]+' '+v["کشور"]+' '+v["شاخه"]+' '+v["هدف"]).toLowerCase();
-                                    if(!text.includes(searchText)) return false;
-                                }
-                                return true;
-                            });
-                            currentPage = 1;
-                            renderTable();
-                            renderPagination();
-                            updateStats();
-                        }
-
-                        // Attach event listeners after DOM is ready
-                        document.getElementById('liveSearch').addEventListener('input', filterVaccines);
-                        document.getElementById('searchButton').addEventListener('click', filterVaccines);
-                        document.getElementById('branchFilter').addEventListener('change', filterVaccines);
-                        document.getElementById('countryFilter').addEventListener('change', filterVaccines);
-                        loadData();
-                    })();
-                </script>
-                <!-- Font Awesome is already included from CDN in the <head> of the page, but ensure it's available -->
-                <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+        <!-- Table -->
+        <div class="table-wrapper">
+            <div class="table-scroll">
+                <table class="vaccine-table">
+                    <thead>
+                        <tr>
+                            <th>💊 نام واکسن</th>
+                            <th>🌍 کشور</th>
+                            <th>🏢 نماینده</th>
+                            <th>🏭 کارخانه</th>
+                            <th>🌡️ دما</th>
+                            <th>📊 شاخه</th>
+                            <th>💊 شکل</th>
+                            <th>📈 گروه</th>
+                            <th>🐾 هدف</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <tr>
+                            <td colspan="9" class="loading">
+                                <div class="spinner"></div>
+                                <div>⏳ در حال بارگذاری اطلاعات...</div>
+                                <small>لطفاً چند لحظه صبر کنید</small>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <!-- Pagination -->
+            <div class="pagination-wrapper">
+                <div class="pagination" id="pagination"></div>
             </div>
         </div>
     </div>
+</div>
+
+<script>
+(function() {
+    let allVaccines = [];
+    let currentPage = 1;
+    let rowsPerPage = 20;
+    let filteredData = [];
+
+    async function loadData() {
+        try {
+            const response = await fetch('assets/data/vaccine.data.json');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const data = await response.json();
+            
+            if (Array.isArray(data) && data.length) {
+                allVaccines = data;
+                populateFilters();
+                filteredData = [...allVaccines];
+                renderTable();
+                renderPagination();
+                updateStats();
+            } else {
+                throw new Error('فرمت داده صحیح نیست');
+            }
+        } catch (err) {
+            console.error(err);
+            document.getElementById('tableBody').innerHTML = 
+                '<tr><td colspan="9" class="no-data">' +
+                '⚠️<br><br>❌ خطا در بارگذاری داده<br>' +
+                '<small>فایل vaccine.data.json یافت نشد یا مشکل دارد</small>' +
+                '</td></tr>';
+            document.getElementById('resultCount').innerHTML = 'خطا در بارگذاری';
+        }
+    }
+
+    function populateFilters() {
+        const branchesSet = new Set();
+        const countriesSet = new Set();
+
+        allVaccines.forEach(function(v) {
+            const branch = v["شاخه"] || "";
+            if (branch) branchesSet.add(branch);
+            if (v["کشور"]) countriesSet.add(v["کشور"]);
+        });
+
+        const branchSelect = document.getElementById('branchFilter');
+        [...branchesSet].sort().forEach(function(b) {
+            const option = document.createElement('option');
+            option.value = b;
+            option.textContent = b;
+            branchSelect.appendChild(option);
+        });
+
+        const countrySelect = document.getElementById('countryFilter');
+        [...countriesSet].sort().forEach(function(c) {
+            const option = document.createElement('option');
+            option.value = c;
+            option.textContent = c;
+            countrySelect.appendChild(option);
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            return m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;');
+        });
+    }
+
+    // آیکون‌های دما با ایموجی
+    function getStorageIcon(storage) {
+        if (!storage) return '';
+        if (storage.includes('-196')) return '❄️ ';
+        if (storage.includes('15-25') || storage.includes('۱۰-۲۵')) return '☀️ ';
+        if (storage.includes('70')) return '🧊 ';
+        return '🌡️ ';
+    }
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        const start = (currentPage - 1) * rowsPerPage;
+        const pageData = filteredData.slice(start, start + rowsPerPage);
+        
+        if (!pageData.length) {
+            tbody.innerHTML = 
+                '<tr><td colspan="9" class="no-data">' +
+                '🔍<br><br>❌ هیچ واکسنی یافت نشد<br>' +
+                '<small>عبارت دیگری جستجو کنید</small>' +
+                '</td></tr>';
+            return;
+        }
+        
+        let html = '';
+        pageData.forEach(function(v) {
+            html += '<tr>' +
+                '<td style="min-width:250px;">' + escapeHtml(v["نام"]) + '</td>' +
+                '<td>' + escapeHtml(v["کشور"]) + '</td>' +
+                '<td>' + escapeHtml(v["نماینده"]) + '</td>' +
+                '<td style="min-width:200px;">' + escapeHtml(v["کارخانه"]) + '</td>' +
+                '<td>' + getStorageIcon(v["دما"]) + escapeHtml(v["دما"] || '2-8°C') + '</td>' +
+                '<td style="min-width:150px;">' + escapeHtml(v["شاخه"]) + '</td>' +
+                '<td>' + escapeHtml(v["شکل"]) + '</td>' +
+                '<td>' + escapeHtml(v["گروه"]) + '</td>' +
+                '<td>' + escapeHtml(v["هدف"]) + '</td>' +
+                '</tr>';
+        });
+        tbody.innerHTML = html;
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        const paginationDiv = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = '';
+            return;
+        }
+        
+        paginationDiv.innerHTML = 
+            '<button id="firstPage" ' + (currentPage === 1 ? 'disabled' : '') + '>⏮</button>' +
+            '<button id="prevPage" ' + (currentPage === 1 ? 'disabled' : '') + '>◀</button>' +
+            '<span style="padding: 0 10px;">صفحه ' + currentPage + ' از ' + totalPages + '</span>' +
+            '<button id="nextPage" ' + (currentPage === totalPages ? 'disabled' : '') + '>▶</button>' +
+            '<button id="lastPage" ' + (currentPage === totalPages ? 'disabled' : '') + '>⏭</button>' +
+            '<select id="rowsPerPageSelect">' +
+            '<option value="10"' + (rowsPerPage === 10 ? ' selected' : '') + '>۱۰ ردیف</option>' +
+            '<option value="20"' + (rowsPerPage === 20 ? ' selected' : '') + '>۲۰ ردیف</option>' +
+            '<option value="50"' + (rowsPerPage === 50 ? ' selected' : '') + '>۵۰ ردیف</option>' +
+            '<option value="100"' + (rowsPerPage === 100 ? ' selected' : '') + '>۱۰۰ ردیف</option>' +
+            '</select>';
+        
+        document.getElementById('firstPage')?.addEventListener('click', function() { 
+            currentPage = 1; renderTable(); renderPagination(); updateStats(); 
+        });
+        document.getElementById('prevPage')?.addEventListener('click', function() { 
+            if (currentPage > 1) { currentPage--; renderTable(); renderPagination(); updateStats(); } 
+        });
+        document.getElementById('nextPage')?.addEventListener('click', function() { 
+            if (currentPage < totalPages) { currentPage++; renderTable(); renderPagination(); updateStats(); } 
+        });
+        document.getElementById('lastPage')?.addEventListener('click', function() { 
+            currentPage = totalPages; renderTable(); renderPagination(); updateStats(); 
+        });
+        document.getElementById('rowsPerPageSelect')?.addEventListener('change', function(e) { 
+            rowsPerPage = +e.target.value; currentPage = 1; renderTable(); renderPagination(); updateStats(); 
+        });
+    }
+
+    function updateStats() {
+        document.getElementById('resultCount').innerHTML = 
+            filteredData.length + ' مورد از ' + allVaccines.length + ' واکسن | صفحه ' + currentPage;
+    }
+
+    function filterVaccines() {
+        const searchText = document.getElementById('liveSearch').value.trim().toLowerCase();
+        const branchVal = document.getElementById('branchFilter').value;
+        const countryVal = document.getElementById('countryFilter').value;
+        
+        filteredData = allVaccines.filter(function(v) {
+            if (branchVal && v["شاخه"] !== branchVal) return false;
+            if (countryVal && v["کشور"] !== countryVal) return false;
+            if (searchText) {
+                const combined = [
+                    v["نام"], v["نماینده"], v["کشور"], 
+                    v["شاخه"], v["هدف"]
+                ].filter(Boolean).join(' ').toLowerCase();
+                if (!combined.includes(searchText)) return false;
+            }
+            return true;
+        });
+        
+        currentPage = 1;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    // Event Listeners
+    document.getElementById('liveSearch').addEventListener('input', filterVaccines);
+    document.getElementById('searchButton').addEventListener('click', filterVaccines);
+    document.getElementById('branchFilter').addEventListener('change', filterVaccines);
+    document.getElementById('countryFilter').addEventListener('change', filterVaccines);
+    
+    // Start
+    loadData();
+})();
+</script>
+<!-- Place your own code above -->
+
 </section>
 
-<section data-bs-version="5.1" class="footer3 cid-globalfooter cid-vmkFRf4Ndm" once="footers" id="footer3-h5">
+<section data-bs-version="5.1" class="footer3 cid-globalfooter cid-vmlyJOMzBh" once="footers" id="footer3-h5">
 
     
 

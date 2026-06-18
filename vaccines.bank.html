@@ -29,7 +29,7 @@
     async function loadData() {
         try {
             // ⚠️ مسیر فایل JSON رو اینجا تنظیم کنید
-            const response = await fetch('assets/data/vaccine.data.json');
+            const response = await fetch('assets/files/vaccine.data.json');
             if (!response.ok) throw new Error('HTTP ' + response.status);
             const data = await response.json();
             
@@ -677,7 +677,7 @@ referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
 
     async function loadData() {
         try {
-            const response = await fetch('assets/data/vaccine.data.json');
+            const response = await fetch('assets/files/vaccine.data.json');
             if (!response.ok) throw new Error('HTTP ' + response.status);
             const data = await response.json();
             

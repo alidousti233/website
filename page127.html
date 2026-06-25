@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html  lang="fa">
+<head>
+  
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+  <link rel="shortcut icon" href="assets/images/veticon-128x128-1.png" type="image/x-icon">
+  <meta name="description" content="مشاهده جدول واکسن های مصرفی طیور در ایران به تفکیک نام واکسن(لاتین)، نام واکسن(فارسی)، شرکت وارد کننده، کشورهای سازنده، کارخانه تولید کننده، نام(لاتین)، نام(فارسی)، شرایط نگهداری، ژنریک قدیم، شکل دارویی، گروه دارویی و حیوان هدف">
+  
+  
+  <title>بانک2</title>
+  <link rel="stylesheet" href="assets/bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/dropdown/css/style.css">
+  <link rel="stylesheet" href="assets/socicon/css/styles.css">
+  <link rel="stylesheet" href="assets/theme/css/style.css">
+  <link href="assets/fonts/style.css" rel="stylesheet">
+  <link rel="preload" as="style" href="assets/mobirise/css/mbr-additional.css?v=RK5OQ4"><link rel="stylesheet" href="assets/mobirise/css/mbr-additional.css?v=RK5OQ4" type="text/css">
+
+  
+  
+  <script>
+    let allVaccines = [];
+    let currentPage = 1;
+    let rowsPerPage = 20;
+    let filteredData = [];
+
+    async function loadData() {
+        try {
+            // ⚠️ مسیر فایل JSON رو اینجا تنظیم کنید
+            const response = await fetch('assets/data/vaccine.data.json');
+            if (!response.ok) throw new Error('HTTP ' + response.status);
+            const data = await response.json();
+            
+            if (Array.isArray(data) && data.length) {
+                allVaccines = data;
+                populateFilters();
+                filteredData = [...allVaccines];
+                renderTable();
+                renderPagination();
+                updateStats();
+            }
+        } catch (err) {
+            console.error('Error:', err);
+            document.getElementById('tableBody').innerHTML = 
+                '<tr><td colspan="9" class="text-center py-5">' +
+                '<p class="text-danger">❌ خطا در بارگذاری اطلاعات</p>' +
+                '<small>لطفاً فایل JSON را در مسیر assets/data/ قرار دهید</small>' +
+                '</td></tr>';
+        }
+    }
+
+    function populateFilters() {
+        const branches = new Set();
+        const countries = new Set();
+        
+        allVaccines.forEach(v => {
+            if (v["شاخه"]) branches.add(v["شاخه"]);
+            if (v["کشور"]) countries.add(v["کشور"]);
+        });
+
+        const branchSelect = document.getElementById('branchFilter');
+        [...branches].sort().forEach(b => {
+            branchSelect.innerHTML += `<option value="${b}">${b}</option>`;
+        });
+
+        const countrySelect = document.getElementById('countryFilter');
+        [...countries].sort().forEach(c => {
+            countrySelect.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    }
+
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function renderTable() {
+        const start = (currentPage - 1) * rowsPerPage;
+        const pageData = filteredData.slice(start, start + rowsPerPage);
+        const tbody = document.getElementById('tableBody');
+        
+        if (!pageData.length) {
+            tbody.innerHTML = 
+                '<tr><td colspan="9" class="text-center py-5">' +
+                '<p>😕 هیچ نتیجه‌ای یافت نشد</p>' +
+                '<small>جستجوی دیگری امتحان کنید</small>' +
+                '</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = pageData.map(v => `
+            <tr>
+                <td><strong>${escapeHtml(v["نام"])}</strong></td>
+                <td>${escapeHtml(v["کشور"])}</td>
+                <td>${escapeHtml(v["نماینده"])}</td>
+                <td>${escapeHtml(v["کارخانه"])}</td>
+                <td>${escapeHtml(v["دما"] || '2-8°C')}</td>
+                <td>${escapeHtml(v["شاخه"])}</td>
+                <td>${escapeHtml(v["شکل"])}</td>
+                <td>${escapeHtml(v["گروه"])}</td>
+                <td>${escapeHtml(v["هدف"])}</td>
+            </tr>
+        `).join('');
+    }
+
+    function renderPagination() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        const paginationDiv = document.getElementById('pagination');
+        
+        if (totalPages <= 1) {
+            paginationDiv.innerHTML = '';
+            return;
+        }
+
+        let html = '<div class="d-flex align-items-center gap-2 flex-wrap">';
+        
+        // First & Previous
+        html += `<button class="pagination-btn" onclick="goToPage(1)" ${currentPage === 1 ? 'disabled' : ''}>⏮</button>`;
+        html += `<button class="pagination-btn" onclick="goToPage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}>◀</button>`;
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="goToPage(${i})">${i}</button>`;
+        }
+
+        // Next & Last
+        html += `<button class="pagination-btn" onclick="goToPage(${currentPage + 1})" ${currentPage === totalPages ? 'disabled' : ''}>▶</button>`;
+        html += `<button class="pagination-btn" onclick="goToPage(${totalPages})" ${currentPage === totalPages ? 'disabled' : ''}>⏭</button>`;
+
+        // Rows per page
+        html += `<select onchange="changeRowsPerPage(this.value)" style="margin-right: 15px; padding: 8px; border-radius: 10px; border: 1px solid #ddd;">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>۱۰ ردیف</option>
+            <option value="20" ${rowsPerPage === 20 ? 'selected' : ''}>۲۰ ردیف</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>۵۰ ردیف</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>۱۰۰ ردیف</option>
+        </select>`;
+        
+        html += '</div>';
+        paginationDiv.innerHTML = html;
+    }
+
+    function goToPage(page) {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        if (page < 1 || page > totalPages) return;
+        currentPage = page;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    function changeRowsPerPage(value) {
+        rowsPerPage = parseInt(value);
+        currentPage = 1;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    function updateStats() {
+        const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+        document.getElementById('resultCount').innerHTML = 
+            `📊 ${filteredData.length} از ${allVaccines.length} واکسن | صفحه ${currentPage} از ${totalPages || 1}`;
+    }
+
+    function filterVaccines() {
+        const searchText = document.getElementById('liveSearch').value.trim().toLowerCase();
+        const branchVal = document.getElementById('branchFilter').value;
+        const countryVal = document.getElementById('countryFilter').value;
+        
+        filteredData = allVaccines.filter(v => {
+            if (branchVal && v["شاخه"] !== branchVal) return false;
+            if (countryVal && v["کشور"] !== countryVal) return false;
+            if (searchText) {
+                const searchIn = [v["نام"], v["نماینده"], v["کشور"], v["شاخه"], v["هدف"]]
+                    .filter(Boolean).join(' ').toLowerCase();
+                return searchIn.includes(searchText);
+            }
+            return true;
+        });
+        
+        currentPage = 1;
+        renderTable();
+        renderPagination();
+        updateStats();
+    }
+
+    // Event Listeners
+    document.getElementById('liveSearch')?.addEventListener('input', filterVaccines);
+    document.getElementById('searchButton')?.addEventListener('click', filterVaccines);
+    document.getElementById('branchFilter')?.addEventListener('change', filterVaccines);
+    document.getElementById('countryFilter')?.addEventListener('change', filterVaccines);
+    
+    // Auto-load
+    loadData();
+</script>
+body {
+    direction: rtl;
+    text-align: right;
+}
+</head>
+<body>
+
+<!-- Analytics -->
+<!-- Default Statcounter code for website
+https://dralidousti.ir -->
+<script type="text/javascript">
+var sc_project=12949224; 
+var sc_invisible=1; 
+var sc_security="cd85cf35"; 
+</script>
+<script type="text/javascript"
+src="https://www.statcounter.com/counter/counter.js"
+async></script>
+<noscript><div class="statcounter"><a title="Web Analytics"
+href="https://statcounter.com/" target="_blank"><img
+class="statcounter"
+src="https://c.statcounter.com/12949224/0/cd85cf35/1/"
+alt="Web Analytics"
+referrerPolicy="no-referrer-when-downgrade"></a></div></noscript>
+<!-- End of Statcounter Code -->
+<!-- /Analytics -->
+
+
+  
+  <section data-bs-version="5.1" class="menu menu1 cid-globalmenu cid-vnsp0EUE0n" once="menu" id="menu1-hj">
+    
+
+    <nav class="navbar navbar-dropdown navbar-fixed-top navbar-expand-lg">
+        <div class="container">
+            <div class="navbar-brand">
+                <span class="navbar-logo">
+                    <a href="index.html">
+                        <img src="assets/images/behine-logo3.png" alt="" style="height: 3rem;">
+                    </a>
+                </span>
+                
+            </div>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-bs-toggle="collapse" data-target="#navbarSupportedContent" data-bs-target="#navbarSupportedContent" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                <div class="hamburger">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav nav-dropdown nav-right" data-app-modern-menu="true"><li class="nav-item dropdown"><a class="nav-link link text-primary dropdown-toggle display-4" href="index.html#در-مورد-من" data-toggle="dropdown-submenu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">درباره من</a><div class="dropdown-menu" aria-labelledby="dropdown-196"><a class="text-primary show dropdown-item display-4" href="resume.html">رزومه</a><a class="text-primary dropdown-item display-4" href="contact-us.html">تماس با من</a></div></li><li class="nav-item dropdown"><a class="nav-link link text-primary dropdown-toggle display-4" href="vet\vaccine.center/vet.vaccine.center.html" data-toggle="dropdown-submenu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">مراکز مایه کوبی</a><div class="dropdown-menu" aria-labelledby="dropdown-527"><a class="text-primary dropdown-item show display-4" href="vaccine.center/iran.html" aria-expanded="false">مراکز به تفکیک استان</a><a class="text-primary dropdown-item show display-4" href="tarafe.html">تعرفه ارائه خدمات</a><a class="text-primary dropdown-item show display-4" href="law.html">قوانین و دستورالعمل ها</a></div></li><li class="nav-item dropdown"><a class="nav-link link text-primary dropdown-toggle display-4" href="index.html#در-مورد-من" data-toggle="dropdown-submenu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="false">واکسیناسیون</a><div class="dropdown-menu" aria-labelledby="dropdown-904"><a class="text-primary dropdown-item display-4" href="livestock.html">دام</a><a class="text-primary show dropdown-item display-4" href="poultry.html">طیور</a><a class="text-primary show dropdown-item display-4" href="pet.html">حیوانات خانگی</a><a class="text-primary show dropdown-item display-4" href="wild_animals.html">حیوانات وحشی</a><a class="text-primary show dropdown-item display-4" href="aquatic.html">آبزیان</a></div></li><li class="nav-item dropdown"><a class="nav-link link text-primary dropdown-toggle display-4" href="index.html#در-مورد-من" data-toggle="dropdown-submenu" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="true">واکسن ها</a><div class="dropdown-menu" aria-labelledby="dropdown-666"><a class="text-primary dropdown-item display-4" href="livestock_vaccine.html">دام</a><a class="text-primary show dropdown-item display-4" href="Poultry_vaccine.html">طیور</a><a class="text-primary show dropdown-item display-4" href="pet_vaccine.html">حیوانات خانگی</a></div></li>
+                    
+                    <li class="nav-item"><a class="nav-link link text-primary display-4" href="index.html">صفحه نخست</a>
+                    </li></ul>
+                
+                
+            </div>
+        </div>
+    </nav>
+</section>
+
+<section class="mbr-section mbr-section--no-padding cid-vnsp0FJ7Jf" id="witsec-html-block-hk">
+
+
+
+
+
+<!-- Place your own code below -->
+<style>
+/* محدود کردن استایل‌ها به این بلاک برای جلوگیری از تداخل */
+.vax-container {
+    direction: rtl;
+    text-align: right;
+    padding: 15px;
+    /* ارث‌بری اجباری فونت از موبیرایز */
+    font-family: inherit !important;
+}
+
+.vax-container * {
+    font-family: inherit !important;
+}
+
+/* هدر اصلی */
+.vax-container .main-header {
+    text-align: center;
+    margin-bottom: 25px;
+    color: #1e3c72;
+}
+.vax-container .main-header h1 {
+    font-size: 1.8rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    font-weight: bold;
+}
+.vax-container .main-header p {
+    font-size: 0.9rem;
+    opacity: 0.9;
+    background: rgba(30, 60, 114, 0.1);
+    display: inline-block;
+    padding: 5px 15px;
+    border-radius: 30px;
+    margin-top: 5px;
+}
+
+/* کارت جستجو و فیلترها (دقیقاً مشابه طرح اصلی شما) */
+.vax-container .search-card {
+    background: rgba(255,255,255,0.95);
+    border-radius: 24px;
+    padding: 20px;
+    margin-bottom: 25px;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+    border: 1px solid #e2e8f0;
+}
+
+.vax-container .search-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.vax-container .search-group {
+    flex: 1;
+    min-width: 180px;
+}
+
+.vax-container .search-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1e3c72;
+    font-size: 0.9rem;
+}
+
+/* استایل اختصاصی نوار جستجو */
+.vax-container .search-input-wrapper {
+    position: relative;
+    width: 100%;
+}
+.vax-container .search-input-wrapper input {
+    width: 100%;
+    padding: 12px 14px 12px 105px; /* فضای سمت چپ برای قرارگیری دکمه */
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    font-size: 0.95rem;
+    background: white;
+    text-align: right;
+    transition: all 0.3s ease;
+    color: #333;
+}
+.vax-container .search-input-wrapper button {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    border: none;
+    color: white;
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    transition: all 0.3s ease;
+    z-index: 2;
+}
+
+.vax-container .search-group select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 2px solid #e2e8f0 !important;
+    border-radius: 16px !important;
+    font-size: 0.95rem;
+    background: white;
+    cursor: pointer;
+    text-align: right;
+    transition: all 0.3s ease;
+    color: #333;
+}
+
+/* حل مشکل حاشیه قرمز و جایگزینی با هاله آبی */
+.vax-container .search-input-wrapper input:focus,
+.vax-container .search-group select:focus,
+.vax-container .search-input-wrapper input:active,
+.vax-container .search-group select:active {
+    outline: none !important;
+    border-color: #2a5298 !important;
+    box-shadow: 0 0 0 3px rgba(42,82,152,0.15) !important;
+}
+
+/* کارت آمار */
+.vax-container .stats-card {
+    background: white;
+    border-radius: 20px;
+    padding: 14px 20px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    border: 1px solid #edf2f7;
+}
+.vax-container .stats-info {
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.9rem;
+}
+
+/* جدول اصلی */
+.vax-container .table-wrapper {
+    background: white;
+    border-radius: 24px 24px 0 0;
+    overflow-x: auto;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.08);
+}
+.vax-container .vaccine-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    min-width: 900px;
+}
+.vax-container .vaccine-table th {
+    background: linear-gradient(135deg, #1e3c72, #2a5298);
+    color: white;
+    padding: 16px 12px;
+    text-align: right;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.vax-container .vaccine-table td {
+    padding: 14px 12px;
+    border-bottom: 1px solid #edf2f7;
+    vertical-align: middle;
+    line-height: 1.5;
+    text-align: right;
+    color: #4a5568;
+}
+.vax-container .vaccine-table tr:hover { background-color: #f7fafc; }
+.vax-container .vaccine-table tr:last-child td { border-bottom: none; }
+
+/* صفحه‌بندی */
+.vax-container .pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 20px;
+    background: white;
+    border-radius: 0 0 24px 24px;
+    border-top: 1px solid #edf2f7;
+    flex-wrap: wrap;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+}
+.vax-container .pagination button {
+    background: #e2e8f0;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-weight: 600;
+    color: #2d3748;
+    transition: all 0.2s;
+}
+.vax-container .pagination button:hover:not(:disabled) { background: #2a5298; color: white; }
+.vax-container .pagination button:disabled { opacity: 0.5; cursor: not-allowed; }
+.vax-container .pagination select {
+    padding: 8px 12px;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    outline: none;
+}
+.vax-container .pagination select:focus { border-color: #2a5298; }
+</style>
+
+<div class="vax-container mbr-text mbr-fonts-style display-7">
+    
+    <div class="main-header">
+        <h1>💉 بانک جامع واکسن‌های دامپزشکی 🐄</h1>
+        <p>📋 جستجوی زنده | صفحه‌بندی خودکار | بدون آیکون تکراری در جدول</p>
+    </div>
+
+    <div class="search-card">
+        <div class="search-row">
+            <div class="search-group" style="flex: 2;">
+                <label>🔍 جستجوی متن آزاد</label>
+                <div class="search-input-wrapper">
+                    <input type="text" id="liveSearch" placeholder="نام واکسن، نماینده، کشور، شاخه...">
+                    <button id="searchButton">جستجو 🔎</button>
+                </div>
+            </div>
+            <div class="search-group">
+                <label>🌿 فیلتر شاخه واکسن</label>
+                <select id="branchFilter">
+                    <option value="">همه شاخه‌ها</option>
+                </select>
+            </div>
+            <div class="search-group">
+                <label>🌍 فیلتر کشور سازنده</label>
+                <select id="countryFilter">
+                    <option value="">همه کشورها</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <div class="stats-card">
+        <div class="stats-info">📊 <span id="resultCount">در حال بارگذاری...</span></div>
+        <div class="stats-info">📅 <span>بروزرسانی اطلاعات: خرداد ۱۴۰۵</span></div>
+    </div>
+
+    <div class="table-wrapper">
+        <table class="vaccine-table">
+            <thead>
+                <tr>
+                    <th>💊 نام واکسن</th>
+                    <th>🌍 کشور</th>
+                    <th>🏢 نماینده</th>
+                    <th>🏭 کارخانه</th>
+                    <th>🌡️ دما</th>
+                    <th>📊 شاخه</th>
+                    <th>⚕️ شکل</th>
+                    <th>📑 گروه</th>
+                    <th>🐾 هدف</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="9" style="text-align:center; padding:50px; color:#667eea;">⏳ در حال بارگذاری اطلاعات...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="pagination" id="pagination"></div>
+</div>
+
+<script>
+let allVaccines = [];
+let currentPage = 1;
+let rowsPerPage = 20;
+let filteredData = [];
+
+async function loadData() {
+    try {
+        const response = await fetch('vaccine.data.json');
+        if (!response.ok) throw new Error('HTTP ' + response.status);
+        const data = await response.json();
+        if (Array.isArray(data) && data.length) {
+            allVaccines = data;
+            populateFilters();
+            filteredData = [...allVaccines];
+            renderTable();
+            renderPagination();
+            updateStats();
+        } else {
+            throw new Error('فرمت داده صحیح نیست');
+        }
+    } catch (err) {
+        console.error(err);
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="9" style="text-align:center; padding:50px; color:#e53e3e;">❌ خطا در بارگذاری فایل vaccine.data.json</td></tr>';
+        document.getElementById('resultCount').innerHTML = 'خطا در بارگذاری';
+    }
+}
+
+function populateFilters() {
+    const branchesSet = new Set();
+    const countriesSet = new Set();
+
+    for (const v of allVaccines) {
+        const branch = v["شاخه"] || "";
+        if (branch) branchesSet.add(branch);
+        if (v["کشور"]) countriesSet.add(v["کشور"]);
+    }
+
+    const branchSelect = document.getElementById('branchFilter');
+    while (branchSelect.options.length > 1) branchSelect.remove(1);
+    [...branchesSet].sort().forEach(b => branchSelect.add(new Option(b, b)));
+
+    const countrySelect = document.getElementById('countryFilter');
+    while (countrySelect.options.length > 1) countrySelect.remove(1);
+    [...countriesSet].sort().forEach(c => countrySelect.add(new Option(c, c)));
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return str.toString().replace(/[&<>]/g, (m) => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+}
+
+function getStorageIcon(storage) {
+    if (!storage) return '';
+    if (storage.includes('-196')) return '❄️';
+    if (storage.includes('15-25') || storage.includes('۱۰-۲۵')) return '☀️';
+    if (storage.includes('70')) return '🧊';
+    return '🌡️';
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tableBody');
+    const start = (currentPage - 1) * rowsPerPage;
+    const pageData = filteredData.slice(start, start + rowsPerPage);
+    
+    if (!pageData.length) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align:center; padding:50px; color:#718096;">🔍 هیچ واکسنی یافت نشد.</td></tr>';
+        return;
+    }
+    
+    let html = '';
+    for (const v of pageData) {
+        html += `<tr>
+            <td style="min-width:220px; font-weight:bold;">${escapeHtml(v["نام"])}</td>
+            <td>${escapeHtml(v["کشور"])}</td>
+            <td>${escapeHtml(v["نماینده"])}</td>
+            <td style="min-width:180px;">${escapeHtml(v["کارخانه"])}</td>
+            <td dir="ltr" style="text-align:right;">${getStorageIcon(v["دما"])} ${escapeHtml(v["دما"] || '2-8°C')}</td>
+            <td>${escapeHtml(v["شاخه"])}</td>
+            <td>${escapeHtml(v["شکل"])}</td>
+            <td>${escapeHtml(v["گروه"])}</td>
+            <td>${escapeHtml(v["هدف"])}</td>
+        </tr>`;
+    }
+    tbody.innerHTML = html;
+}
+
+function renderPagination() {
+    const totalPages = Math.ceil(filteredData.length / rowsPerPage);
+    const paginationDiv = document.getElementById('pagination');
+    if (totalPages <= 1) {
+        paginationDiv.innerHTML = '';
+        return;
+    }
+    paginationDiv.innerHTML = `
+        <button id="firstPage" ${currentPage === 1 ? 'disabled' : ''}>ابتدا ⮜</button>
+        <button id="prevPage" ${currentPage === 1 ? 'disabled' : ''}>قبلی ◄</button>
+        <span style="padding: 0 10px; font-weight:bold;">صفحه ${currentPage} از ${totalPages}</span>
+        <button id="nextPage" ${currentPage === totalPages ? 'disabled' : ''}>► بعدی</button>
+        <button id="lastPage" ${currentPage === totalPages ? 'disabled' : ''}>⮞ انتها</button>
+        <select id="rowsPerPageSelect" style="margin-right:10px;">
+            <option value="10" ${rowsPerPage === 10 ? 'selected' : ''}>۱۰ ردیف</option>
+            <option value="20" ${rowsPerPage === 20 ? 'selected' : ''}>۲۰ ردیف</option>
+            <option value="50" ${rowsPerPage === 50 ? 'selected' : ''}>۵۰ ردیف</option>
+            <option value="100" ${rowsPerPage === 100 ? 'selected' : ''}>۱۰۰ ردیف</option>
+        </select>
+    `;
+    
+    document.getElementById('firstPage')?.addEventListener('click', () => { currentPage = 1; renderTable(); renderPagination(); updateStats(); });
+    document.getElementById('prevPage')?.addEventListener('click', () => { if (currentPage > 1) { currentPage--; renderTable(); renderPagination(); updateStats(); } });
+    document.getElementById('nextPage')?.addEventListener('click', () => { if (currentPage < totalPages) { currentPage++; renderTable(); renderPagination(); updateStats(); } });
+    document.getElementById('lastPage')?.addEventListener('click', () => { currentPage = totalPages; renderTable(); renderPagination(); updateStats(); });
+    document.getElementById('rowsPerPageSelect')?.addEventListener('change', (e) => { rowsPerPage = +e.target.value; currentPage = 1; renderTable(); renderPagination(); updateStats(); });
+}
+
+function updateStats() {
+    document.getElementById('resultCount').innerHTML = `${filteredData.length} مورد از ${allVaccines.length} واکسن`;
+}
+
+function filterVaccines() {
+    const searchText = document.getElementById('liveSearch').value.trim().toLowerCase();
+    const branchVal = document.getElementById('branchFilter').value;
+    const countryVal = document.getElementById('countryFilter').value;
+    
+    filteredData = allVaccines.filter(v => {
+        if (branchVal && v["شاخه"] !== branchVal) return false;
+        if (countryVal && v["کشور"] !== countryVal) return false;
+        if (searchText) {
+            const combined = Object.values(v).join(' ').toLowerCase();
+            if (!combined.includes(searchText)) return false;
+        }
+        return true;
+    });
+    
+    currentPage = 1;
+    renderTable();
+    renderPagination();
+    updateStats();
+}
+
+document.getElementById('liveSearch').addEventListener('input', filterVaccines);
+document.getElementById('searchButton').addEventListener('click', filterVaccines);
+document.getElementById('branchFilter').addEventListener('change', filterVaccines);
+document.getElementById('countryFilter').addEventListener('change', filterVaccines);
+
+loadData();
+</script>
+<!-- Place your own code above -->
+
+</section>
+
+<section data-bs-version="5.1" class="footer3 cid-globalfooter cid-vnsp0Ggcne" once="footers" id="footer3-hl">
+
+    
+
+    
+
+    <div class="container">
+        <div class="media-container-row align-center mbr-white">
+            <div class="row row-links">
+                <ul class="foot-menu">
+                    
+                    
+                    
+                    
+                    
+                <li class="foot-menu-item mbr-fonts-style display-4"><a href="index.html" class="text-success">صفحه نخست</a></li><li class="foot-menu-item mbr-fonts-style display-4"><a href="vaccine.html" class="text-success">واکسن ها</a></li><li class="foot-menu-item mbr-fonts-style display-4"><a href="service.html" class="text-success">واکسیناسیون</a></li><li class="foot-menu-item mbr-fonts-style display-4"><a href="contact-us.html" class="text-success text-primary">تماس با من</a></li><li class="foot-menu-item mbr-fonts-style display-4"><a href="index.html#در-مورد-من" class="text-success text-primary">در مورد من</a></li></ul>
+            </div>
+            
+            <div class="row row-copirayt">
+                <p class="mbr-text mb-0 mbr-fonts-style mbr-white align-center display-4">©&nbsp;استفاده از مطالب سایت تنها با درج لینک مستقیم به آن مطلب مجاز است.<br></p>
+            </div>
+        </div>
+    </div>
+</section><script src="assets/bootstrap/js/bootstrap.bundle.min.js"></script>  <script src="assets/smoothscroll/smooth-scroll.js"></script>  <script src="assets/ytplayer/index.js"></script>  <script src="assets/dropdown/js/navbar-dropdown.js"></script>  <script src="assets/theme/js/script.js"></script>  
+  
+  
+ <div id="scrollToTop" class="scrollToTop mbr-arrow-up"><a style="text-align: center;"><i class="mbr-arrow-up-icon mbr-arrow-up-icon-cm cm-icon cm-icon-smallarrow-up"></i></a></div>
+  </body>
+</html>

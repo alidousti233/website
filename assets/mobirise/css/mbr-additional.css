@@ -1249,6 +1249,8 @@ a {
 }
 .cid-globalslide .mbr-section-title {
   color: #000000;
+  direction: rtl;
+  text-align: center;
 }
 .cid-globalslide .mbr-text,
 .cid-globalslide .mbr-section-btn {

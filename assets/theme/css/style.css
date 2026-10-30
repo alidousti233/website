@@ -935,9 +935,15 @@ blockquote {
   display: none;
 }
 
-.dropdown-item:hover + .dropdown-menu,
-.dropdown-menu:hover {
+.dropdown-item + .dropdown-menu.show {
   display: block;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .dropdown-item:hover + .dropdown-menu,
+  .dropdown-menu:hover {
+    display: block;
+  }
 }
 
 @media (min-aspect-ratio: 16/9) {

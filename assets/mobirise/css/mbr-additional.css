@@ -1299,12 +1299,18 @@ a {
   color: #12302c;
   border: 1px solid rgba(18, 48, 44, 0.12);
   border-radius: 50%;
-  transition: all 0.3s;
+  transition: background-color 0.3s, color 0.3s;
   z-index: 2;
+  -webkit-tap-highlight-color: transparent;
 }
 .cid-globalslide .embla__button:disabled {
   cursor: default;
   display: none;
+}
+.cid-globalslide .embla__button:active {
+  background: #1b7f74;
+  color: #fff;
+  transition-duration: 0s;
 }
 .cid-globalslide .embla__button:focus-visible {
   background: #1b7f74;
@@ -1327,8 +1333,8 @@ a {
 }
 @media (max-width: 768px) {
   .cid-globalslide .embla__button {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     font-size: 16px;
   }
   .cid-globalslide .embla__button.embla__button--prev {
